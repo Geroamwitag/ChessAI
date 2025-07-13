@@ -9,15 +9,34 @@ class Pawn(Piece):
             image_path = "assets/bP.png"
         super().__init__(row, col, color, image_path)
 
+    
+    def get_valid_moves(self, board):
+        moves = []
+        direction = -1 if self.color == 'white' else 1
+        start_row = 6 if self.color == 'white' else 1
+
+        # One square forward
+        one_step_row = self.row + direction
+        if 0 <= one_step_row < board.rows and board.pieces[one_step_row][self.col] is None:
+            moves.append((one_step_row, self.col))
+
+            # Two squares forward from starting row
+            two_step_row = self.row + 2 * direction
+            if self.row == start_row and board.pieces[two_step_row][self.col] is None:
+                moves.append((two_step_row, self.col))
+
+        # Diagonal captures
+        if 0 <= one_step_row < board.rows:
+            for dc in [-1, 1]:
+                new_col = self.col + dc
+                if 0 <= new_col < board.cols:
+                    target = board.pieces[one_step_row][new_col]
+                    if target and target.color != self.color:
+                        moves.append((one_step_row, new_col))
+
+        # En passant handled later!
+        return moves
+
 
     def __str__(self):
         return f"{self.color} pawn"
-    
-
-    def get_valid_moves(self,):
-        # depending on board orientation
-
-        # 1 tile ahead
-
-        # 2 tiles ahead
-        pass

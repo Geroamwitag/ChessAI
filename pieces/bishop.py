@@ -12,8 +12,3 @@ class Bishop(Piece):
 
     def __str__(self):
         return f"{self.color} bishop"
-
-
-    def get_valid_moves(self,):
-        # Return list of valid positions for the bishop
-        pass

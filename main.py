@@ -2,6 +2,9 @@ import pygame
 from board import Board
 
 pygame.init()
+pygame.display.set_caption("Chess")
+icon = pygame.image.load("assets/bQ.png")
+pygame.display.set_icon(icon)
 screen = pygame.display.set_mode((640, 640))
 clock = pygame.time.Clock()
 

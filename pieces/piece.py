@@ -11,9 +11,16 @@ class Piece:
         self.image_size = 60
         self.image = pygame.transform.scale(self.image, (self.image_size, self.image_size)) # 80x80 is a tile size
 
-
+        
     def get_valid_moves(self, board):
-        return []
+        # if piece has no get_valid_moves method, default to allowing all moves except for tiles with same color
+        valid_moves = []
+        for r in range(board.rows):
+            for c in range(board.cols):
+                # if tile is empty, or the tile has a piece with the oposite color
+                if board.pieces[r][c] is None or board.pieces[r][c].color != self.color:
+                    valid_moves.append((r, c))
+        return valid_moves
     
 
     def draw(self, screen, tile_size):

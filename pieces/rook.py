@@ -13,7 +13,3 @@ class Rook(Piece):
     def __str__(self):
         return f"{self.color} rook"
 
-
-    def get_valid_moves(self,):
-        # Return list of valid positions for the rook
-        pass

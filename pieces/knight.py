@@ -13,7 +13,3 @@ class Knight(Piece):
     def __str__(self):
         return f"{self.color} knight"
 
-
-    def get_valid_moves(self,):
-        # Return list of valid positions for the knight
-        pass

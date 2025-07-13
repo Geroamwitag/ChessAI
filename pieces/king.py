@@ -12,8 +12,3 @@ class King(Piece):
 
     def __str__(self):
         return f"{self.color} king"
-
-
-    def get_valid_moves(self,):
-        # Return list of valid positions for the king
-        pass

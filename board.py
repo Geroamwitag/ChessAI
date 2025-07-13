@@ -4,16 +4,20 @@ import pygame
 
 class Board:
     def __init__(self):
+        # board sizing
         self.tile_size = 80
         self.rows = 8
         self.cols = 8
+        
+        # store selected piece and its valid moves
         self.selected_piece = None
+        self.valid_moves = []
         
         # empty "chess board" 2D list to manage piece locations
         self.pieces = [[None for _ in range(self.cols)] for _ in range(self.rows)]
         self.setup_pieces()
 
-
+        
     def setup_pieces(self):
         # Pawns
         for col in range(self.cols):
@@ -56,13 +60,20 @@ class Board:
        
         if self.selected_piece:
             # second click
-            self.move_piece(self.selected_piece, row, col)
+            if (row, col) in self.valid_moves:
+                self.move_piece(self.selected_piece, row, col)
+
+            # deselect after any second click
+            self.selected_piece = None
+            self.valid_moves = []
+
         else:
             # first click
             piece = self.pieces[row][col]
             
             if piece: 
                 self.selected_piece = piece
+                self.valid_moves = piece.get_valid_moves(self)
                 print(f"selected {self.selected_piece} at {self.selected_piece.row}, {self.selected_piece.col}")
             else:
                 print("no piece selected") 
@@ -109,6 +120,23 @@ class Board:
                                 self.tile_size         # Height
                                 )
                 )
+
+        # draw selected piece highlights, highlight the piece and its valid moves
+        if self.selected_piece:
+            highlight_color = (255, 255, 0, 100)  # yellowish
+            surf = pygame.Surface((self.tile_size, self.tile_size), pygame.SRCALPHA)
+            surf.fill(highlight_color)
+            row, col = self.selected_piece.row, self.selected_piece.col
+            screen.blit(surf, (col * self.tile_size, row * self.tile_size))
+
+
+        # highlight valid moves
+        for move in self.valid_moves:
+            r, c = move
+            surf = pygame.Surface((self.tile_size, self.tile_size), pygame.SRCALPHA)
+            surf.fill((0, 255, 0, 100))  # greenish
+            screen.blit(surf, (c * self.tile_size, r * self.tile_size))
+
 
         # draw pieces
         for row in range(self.rows):

@@ -12,8 +12,3 @@ class Queen(Piece):
 
     def __str__(self):
         return f"{self.color} queen"
-
-
-    def get_valid_moves(self,):
-        # Return list of valid positions for the queen
-        pass
