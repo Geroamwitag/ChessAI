@@ -9,10 +9,15 @@ board = Board()
 
 # game loop
 running = True
-while running:
+while running:  
+
+# event handler
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            pos = pygame.mouse.get_pos() # x,y co. of click
+            board.handle_click(pos)
 
     screen.fill((255, 255, 255))
 

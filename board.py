@@ -7,10 +7,12 @@ class Board:
         self.tile_size = 80
         self.rows = 8
         self.cols = 8
+        self.selected_piece = None
         
         # empty "chess board" 2D list to manage piece locations
         self.pieces = [[None for _ in range(self.cols)] for _ in range(self.rows)]
         self.setup_pieces()
+
 
     def setup_pieces(self):
         # Pawns
@@ -45,8 +47,42 @@ class Board:
         self.pieces[7][4] = King(7, 4, "white")
 
 
-    def move_piece(self, start_pos, end_pos):
-        # Validate and move piece
+    def handle_click(self, pos):
+        x,y = pos # exact co. of click
+
+        # clever method to get the row and col of the pos
+        row = y // self.tile_size
+        col = x // self.tile_size
+       
+        if self.selected_piece:
+            # second click
+            self.move_piece(self.selected_piece, row, col)
+        else:
+            # first click
+            piece = self.pieces[row][col]
+            
+            if piece: 
+                self.selected_piece = piece
+                print(f"selected {self.selected_piece} at {self.selected_piece.row}, {self.selected_piece.col}")
+            else:
+                print("no piece selected") 
+
+    
+    def move_piece(self, piece, row, col):
+        current_row = piece.row
+        current_col = piece.col
+
+        # remove piece from current position
+        self.pieces[current_row][current_col] = None
+
+        # move piece to next pos
+        piece.row = row
+        piece.col = col
+        self.pieces[row][col] = piece
+        print(f"{piece} to {piece.row}, {piece.col}")
+
+        # revert selected piece to none
+        self.selected_piece = None
         pass
 
 

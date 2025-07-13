@@ -2,11 +2,16 @@ from pieces import Piece
 
 class Rook(Piece):
     def __init__(self, row, col, color):
+        self.color = color
         if color == "white":
             image_path = "assets/wR.png"
         else:
             image_path = "assets/bR.png"
         super().__init__(row, col, color, image_path)
+
+
+    def __str__(self):
+        return f"{self.color} rook"
 
 
     def get_valid_moves(self,):
