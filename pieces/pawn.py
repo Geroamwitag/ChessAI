@@ -9,6 +9,10 @@ class Pawn(Piece):
             image_path = "assets/bP.png"
         super().__init__(row, col, color, image_path)
 
+
+    def __str__(self):
+        return f"{self.color} pawn"
+
     
     def get_valid_moves(self, board):
         moves = []
@@ -36,7 +40,3 @@ class Pawn(Piece):
 
         # En passant handled later!
         return moves
-
-
-    def __str__(self):
-        return f"{self.color} pawn"

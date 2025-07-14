@@ -16,6 +16,7 @@ class Board:
         # empty "chess board" 2D list to manage piece locations
         self.pieces = [[None for _ in range(self.cols)] for _ in range(self.rows)]
         self.setup_pieces()
+        self.turn_color = "white"
 
         
     def setup_pieces(self):
@@ -58,10 +59,13 @@ class Board:
         row = y // self.tile_size
         col = x // self.tile_size
        
-        if self.selected_piece:
+        if self.selected_piece and self.selected_piece.color == self.turn_color:
             # second click
             if (row, col) in self.valid_moves:
                 self.move_piece(self.selected_piece, row, col)
+                self.turn_color = "black" if self.turn_color == "white" else "white"
+                print(f"turn: {self.turn_color}")
+
 
             # deselect after any second click
             self.selected_piece = None
