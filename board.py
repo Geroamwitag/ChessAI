@@ -4,16 +4,15 @@ import pygame
 
 class Board:
     def __init__(self):
-        # board sizing
         self.tile_size = 80
         self.rows = 8
         self.cols = 8
-        
-        # store selected piece and its valid moves
+
         self.selected_piece = None
         self.valid_moves = []
+        self.move_history = []
+        self.en_passant_target = None
         
-        # empty "chess board" 2D list to manage piece locations
         self.pieces = [[None for _ in range(self.cols)] for _ in range(self.rows)]
         self.setup_pieces()
         self.turn_color = "white"
@@ -63,7 +62,6 @@ class Board:
             # second click
             if (row, col) in self.valid_moves:
                 self.move_piece(self.selected_piece, row, col)
-                self.turn_color = "black" if self.turn_color == "white" else "white"
                 print(f"turn: {self.turn_color}")
 
 
@@ -75,7 +73,7 @@ class Board:
             # first click
             piece = self.pieces[row][col]
             
-            if piece: 
+            if piece and piece.color == self.turn_color: 
                 self.selected_piece = piece
                 self.valid_moves = piece.get_valid_moves(self)
                 print(f"selected {self.selected_piece} at {self.selected_piece.row}, {self.selected_piece.col}")
@@ -83,22 +81,62 @@ class Board:
                 print("no piece selected") 
 
     
-    def move_piece(self, piece, row, col):
+    def move_piece(self, piece, new_row, new_col):
         current_row = piece.row
         current_col = piece.col
+
+        # move details
+        captured = self.pieces[new_row][new_col] # None if no piece at index
+        move = Move(piece, (piece.row, piece.col), (new_row, new_col), captured)
+        self.move_history.append(move)
 
         # remove piece from current position
         self.pieces[current_row][current_col] = None
 
         # move piece to next pos
-        piece.row = row
-        piece.col = col
-        self.pieces[row][col] = piece
+        piece.row = new_row
+        piece.col = new_col
+        self.pieces[new_row][new_col] = piece
         print(f"{piece} to {piece.row}, {piece.col}")
+
+        # if a pawn moves 2 squares, set en passant target to the tile behind the pawn
+        if isinstance(piece, Pawn):
+            # if old row and new row difference is 2
+            if abs(new_row - piece.row) == 2:
+                # store square behind pawn as en passant target, direction depends on piece color
+                dir = 1 if piece.color == 'white' else -1
+                self.en_passant_target = (new_row - dir, new_col)
+            # if pawn moves once remove en passant target
+            else:
+                self.en_passant_target = None
+        # if any other piece moves remove en passant target
+        else:
+            self.en_passant_target = None
 
         # revert selected piece to none
         self.selected_piece = None
-        pass
+        self.turn_color = "black" if self.turn_color == "white" else "white"
+    
+
+    def undo_move(self):
+        if not self.move_history:
+            return
+
+        move = self.move_history.pop() # .pop removes last index by default
+        piece = move.piece
+
+        # restore piece to original square
+        self.pieces[piece.row][piece.col] = None
+        self.pieces[move.start_pos[0]][move.start_pos[1]] = piece
+
+        piece.row, piece.col = move.start_pos
+
+        # restore captured piece if any
+        if move.captured:
+            self.pieces[move.end_pos[0]][move.end_pos[1]] = move.captured
+
+        # switch turn
+        self.turn_color = 'black' if self.turn_color == 'white' else 'white'
 
 
     def draw(self, screen):
@@ -148,3 +186,13 @@ class Board:
                 piece = self.pieces[row][col]
                 if piece is not None:
                     piece.draw(screen, self.tile_size)
+
+
+class Move:
+    def __init__(self, piece, start_pos, end_pos, captured=None, is_en_passant=False, is_castling=False):
+        self.piece = piece
+        self.start_pos = start_pos
+        self.end_pos = end_pos
+        self.captured = captured
+        self.is_en_passant = is_en_passant
+        self.is_castling = is_castling

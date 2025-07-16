@@ -19,7 +19,7 @@ class Pawn(Piece):
         direction = -1 if self.color == 'white' else 1
         start_row = 6 if self.color == 'white' else 1
 
-        # One square forward
+        # one square forward
         one_step_row = self.row + direction
         if 0 <= one_step_row < board.rows and board.pieces[one_step_row][self.col] is None:
             moves.append((one_step_row, self.col))
@@ -29,7 +29,7 @@ class Pawn(Piece):
             if self.row == start_row and board.pieces[two_step_row][self.col] is None:
                 moves.append((two_step_row, self.col))
 
-        # Diagonal captures
+        # diagonal captures
         if 0 <= one_step_row < board.rows:
             for dc in [-1, 1]:
                 new_col = self.col + dc
@@ -38,5 +38,11 @@ class Pawn(Piece):
                     if target and target.color != self.color:
                         moves.append((one_step_row, new_col))
 
-        # En passant handled later!
+        # en passant capture
+        for dc in [-1, 1]:
+            r, c = self.row, self.col + dc
+            if 0 <= c < board.cols and board.en_passant_target:
+                if board.en_passant_target == (self.row + direction, c):
+                    moves.append(board.en_passant_target)
+
         return moves
