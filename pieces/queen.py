@@ -14,7 +14,7 @@ class Queen(Piece):
         return f"{self.color} queen"
     
 
-    def get_valid_moves(self, board):
+    def get_valid_moves(self, board, for_attack=False):
         moves = []
         directions = [
             (-1, 0), (1, 0), (0, -1), (0, 1),   # rook directions

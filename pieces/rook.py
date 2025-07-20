@@ -3,6 +3,7 @@ from pieces import Piece
 class Rook(Piece):
     def __init__(self, row, col, color):
         self.color = color
+        self.has_moved = False
         if color == "white":
             image_path = "assets/wR.png"
         else:
@@ -14,7 +15,7 @@ class Rook(Piece):
         return f"{self.color} rook"
 
 
-    def get_valid_moves(self, board):
+    def get_valid_moves(self, board, for_attack=False):
         moves = []
         directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 

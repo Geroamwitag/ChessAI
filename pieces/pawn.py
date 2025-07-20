@@ -14,7 +14,7 @@ class Pawn(Piece):
         return f"{self.color} pawn"
 
     
-    def get_valid_moves(self, board):
+    def get_valid_moves(self, board, for_attack=False):
         moves = []
         direction = -1 if self.color == 'white' else 1
         start_row = 6 if self.color == 'white' else 1

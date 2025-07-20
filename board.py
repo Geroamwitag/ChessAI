@@ -95,9 +95,20 @@ class Board:
         for row in self.pieces:
             for piece in row:
                 if piece and piece.color != color:
-                    if (king.row, king.col) in piece.get_valid_moves(self):
+                    if (king.row, king.col) in piece.get_valid_moves(self, for_attack=True):
                         return True
         return False
+    
+
+    def is_safe_for_castling(self, king, squares):
+        for r, c in squares:
+            # make a copy and check if king would be in check at each square
+            board_copy = deepcopy(self)
+            board_copy.pieces[king.row][king.col] = None
+            board_copy.pieces[r][c] = king
+            if board_copy.is_in_check(king.color):
+                return False
+        return True
 
 
     def get_legal_moves(self, piece):
@@ -128,6 +139,26 @@ class Board:
                 # the captured pawn is behind the target square
                 captured_pawn_row = new_row + (1 if piece.color == 'white' else -1)
                 captured = self.pieces[captured_pawn_row][new_col]
+
+        # check if a rook or king moved for castling
+        if isinstance(piece, (King, Rook)):
+            piece.has_moved = True
+
+        # detect castling
+        if isinstance(piece, King) and abs(new_col - piece.col) == 2:
+            row = piece.row
+            if new_col == 6:  # Kingside
+                rook = self.pieces[row][7]
+                self.pieces[row][5] = rook
+                self.pieces[row][7] = None
+                rook.col = 5
+                rook.has_moved = True
+            elif new_col == 2:  # Queenside
+                rook = self.pieces[row][0]
+                self.pieces[row][3] = rook
+                self.pieces[row][0] = None
+                rook.col = 3
+                rook.has_moved = True
 
         # create Move record
         move = Move(piece, (piece.row, piece.col), (new_row, new_col), captured, is_en_passant=is_en_passant)

@@ -14,7 +14,7 @@ class Bishop(Piece):
         return f"{self.color} bishop"
     
 
-    def get_valid_moves(self, board):
+    def get_valid_moves(self, board, for_attack=False):
         moves = []
         directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
 

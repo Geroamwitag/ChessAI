@@ -14,7 +14,7 @@ class Knight(Piece):
         return f"{self.color} knight"
     
 
-    def get_valid_moves(self, board):
+    def get_valid_moves(self, board, for_attack=False):
         moves = []
         directions = [
             (-2, -1), (-2, 1), (-1, -2), (-1, 2),
