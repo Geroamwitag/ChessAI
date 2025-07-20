@@ -1,4 +1,5 @@
 from pieces import *
+from copy import deepcopy
 import pygame
 
 
@@ -75,23 +76,69 @@ class Board:
             
             if piece and piece.color == self.turn_color: 
                 self.selected_piece = piece
-                self.valid_moves = piece.get_valid_moves(self)
+                self.valid_moves = self.get_legal_moves(piece)
                 print(f"selected {self.selected_piece} at {self.selected_piece.row}, {self.selected_piece.col}")
             else:
-                print("no piece selected") 
+                print("no piece selected")
+
+
+    def is_in_check(self, color):
+        # find king
+        king = None
+        for row in self.pieces:
+            for piece in row:
+                if piece and isinstance(piece, King) and piece.color == color:
+                    king = piece
+                    break
+
+        # check if the king tile is in the pieces validmoves                
+        for row in self.pieces:
+            for piece in row:
+                if piece and piece.color != color:
+                    if (king.row, king.col) in piece.get_valid_moves(self):
+                        return True
+        return False
+
+
+    def get_legal_moves(self, piece):
+        legal_moves = []
+        # test all moves in valid moves
+        for move in piece.get_valid_moves(self):
+            # copy current board
+            board_copy = deepcopy(self)
+            board_copy.move_piece(board_copy.pieces[piece.row][piece.col], move[0], move[1])
+            # if a next move would leave the king in check do not allow that move
+            if not board_copy.is_in_check(piece.color):
+                legal_moves.append(move)
+        return legal_moves 
 
     
     def move_piece(self, piece, new_row, new_col):
         current_row = piece.row
         current_col = piece.col
 
-        # move details
-        captured = self.pieces[new_row][new_col] # None if no piece at index
-        move = Move(piece, (piece.row, piece.col), (new_row, new_col), captured)
+        is_en_passant = False
+        # the captured piece if any
+        captured = self.pieces[new_row][new_col] 
+
+        # detect en passant before changing current row
+        if isinstance(piece, Pawn):
+            if self.en_passant_target == (new_row, new_col) and captured is None:
+                is_en_passant = True
+                # the captured pawn is behind the target square
+                captured_pawn_row = new_row + (1 if piece.color == 'white' else -1)
+                captured = self.pieces[captured_pawn_row][new_col]
+
+        # create Move record
+        move = Move(piece, (piece.row, piece.col), (new_row, new_col), captured, is_en_passant=is_en_passant)
         self.move_history.append(move)
 
         # remove piece from current position
         self.pieces[current_row][current_col] = None
+
+        # if en passant, remove captured pawn
+        if is_en_passant:
+            self.pieces[captured_pawn_row][new_col] = None
 
         # move piece to next pos
         piece.row = new_row
@@ -99,24 +146,19 @@ class Board:
         self.pieces[new_row][new_col] = piece
         print(f"{piece} to {piece.row}, {piece.col}")
 
-        # if a pawn moves 2 squares, set en passant target to the tile behind the pawn
+        # set new en passant target, ONLY if pawn just moved two squares
         if isinstance(piece, Pawn):
-            # if old row and new row difference is 2
-            if abs(new_row - piece.row) == 2:
-                # store square behind pawn as en passant target, direction depends on piece color
-                dir = 1 if piece.color == 'white' else -1
+            if abs(new_row - current_row) == 2:
+                dir = -1 if piece.color == 'white' else 1
                 self.en_passant_target = (new_row - dir, new_col)
-            # if pawn moves once remove en passant target
             else:
                 self.en_passant_target = None
-        # if any other piece moves remove en passant target
         else:
             self.en_passant_target = None
 
-        # revert selected piece to none
         self.selected_piece = None
         self.turn_color = "black" if self.turn_color == "white" else "white"
-    
+        
 
     def undo_move(self):
         if not self.move_history:

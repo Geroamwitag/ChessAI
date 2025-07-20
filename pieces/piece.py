@@ -11,6 +11,14 @@ class Piece:
         self.image_size = 60
         self.image = pygame.transform.scale(self.image, (self.image_size, self.image_size)) # 80x80 is a tile size
 
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        # images don’t matter for copies
+        # important when checking for king check
+        state['image'] = None  
+        return state
+
         
     def get_valid_moves(self, board):
         # if piece has no get_valid_moves method, default to allowing all moves except for tiles with same color
