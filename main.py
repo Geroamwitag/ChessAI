@@ -16,11 +16,17 @@ while running:
 
     # event handler
     for event in pygame.event.get():
+        # quit game
         if event.type == pygame.QUIT:
             running = False
-        elif event.type == pygame.MOUSEBUTTONDOWN:
+        # handling tile clicks
+        if event.type == pygame.MOUSEBUTTONDOWN:
             pos = pygame.mouse.get_pos() # x,y co. of click
             board.handle_click(pos)
+        # undo last move
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_z or event.key == pygame.K_BACKSPACE:  # If 'Z' key is pressed
+                board.undo_move()
 
     screen.fill((255, 255, 255))
 

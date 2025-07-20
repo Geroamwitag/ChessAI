@@ -42,7 +42,12 @@ class Pawn(Piece):
         for dc in [-1, 1]:
             r, c = self.row, self.col + dc
             if 0 <= c < board.cols and board.en_passant_target:
-                if board.en_passant_target == (self.row + direction, c):
-                    moves.append(board.en_passant_target)
-
+                target_row, target_col = board.en_passant_target
+                if (target_row, target_col) == (self.row + direction, c):
+                    target_pawn = board.pieces[self.row][c]
+                    if (
+                        isinstance(target_pawn, Pawn) and
+                        target_pawn.color != self.color
+                    ):
+                        moves.append((target_row, target_col))
         return moves
