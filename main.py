@@ -13,7 +13,6 @@ board = Board()
 # game loop
 running = True
 while running:  
-
     # event handler
     for event in pygame.event.get():
         # quit game
@@ -32,6 +31,9 @@ while running:
 
     # draw board
     board.draw(screen)
+
+    if board.game_over:
+        board.draw_game_over_popup(screen)
 
     # cleanest way to draw the game every frame
     pygame.display.flip()

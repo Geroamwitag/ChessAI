@@ -18,6 +18,9 @@ class Board:
         self.setup_pieces()
         self.turn_color = "white"
 
+        self.game_over = False
+        self.game_result = None
+
         
     def setup_pieces(self):
         # Pawns
@@ -53,6 +56,9 @@ class Board:
 
 
     def handle_click(self, pos):
+        if self.game_over:
+            return
+        
         x,y = pos # exact co. of click
 
         # clever method to get the row and col of the pos
@@ -63,8 +69,6 @@ class Board:
             # second click
             if (row, col) in self.valid_moves:
                 self.move_piece(self.selected_piece, row, col)
-                print(f"turn: {self.turn_color}")
-
 
             # deselect after any second click
             self.selected_piece = None
@@ -117,28 +121,36 @@ class Board:
         for move in piece.get_valid_moves(self):
             # copy current board
             board_copy = deepcopy(self)
-            board_copy.move_piece(board_copy.pieces[piece.row][piece.col], move[0], move[1])
+            board_copy.move_piece(board_copy.pieces[piece.row][piece.col], move[0], move[1], is_simulation=True)
             # if a next move would leave the king in check do not allow that move
             if not board_copy.is_in_check(piece.color):
                 legal_moves.append(move)
         return legal_moves 
 
     
-    def move_piece(self, piece, new_row, new_col):
+    def move_piece(self, piece, new_row, new_col, is_simulation=False):
         current_row = piece.row
         current_col = piece.col
 
         is_en_passant = False
         # the captured piece if any
-        captured = self.pieces[new_row][new_col] 
+        captured = self.pieces[new_row][new_col]
 
-        # detect en passant before changing current row
+        # promote if applicable
+        promotion = False
+        if isinstance(piece, Pawn):
+            if (piece.color == 'white' and new_row == 0) or \
+            (piece.color == 'black' and new_row == 7):
+                promotion = True
+
+        # en passant
         if isinstance(piece, Pawn):
             if self.en_passant_target == (new_row, new_col) and captured is None:
                 is_en_passant = True
                 # the captured pawn is behind the target square
                 captured_pawn_row = new_row + (1 if piece.color == 'white' else -1)
                 captured = self.pieces[captured_pawn_row][new_col]
+
 
         # check if a rook or king moved for castling
         if isinstance(piece, (King, Rook)):
@@ -161,8 +173,9 @@ class Board:
                 rook.has_moved = True
 
         # create Move record
-        move = Move(piece, (piece.row, piece.col), (new_row, new_col), captured, is_en_passant=is_en_passant)
-        self.move_history.append(move)
+        if not is_simulation:
+            move = Move(piece, (piece.row, piece.col), (new_row, new_col), captured, is_en_passant=is_en_passant)
+            self.move_history.append(move)
 
         # remove piece from current position
         self.pieces[current_row][current_col] = None
@@ -175,7 +188,8 @@ class Board:
         piece.row = new_row
         piece.col = new_col
         self.pieces[new_row][new_col] = piece
-        print(f"{piece} to {piece.row}, {piece.col}")
+        if not is_simulation:
+            print(f"{piece} to {piece.row}, {piece.col}")
 
         # set new en passant target, ONLY if pawn just moved two squares
         if isinstance(piece, Pawn):
@@ -187,8 +201,14 @@ class Board:
         else:
             self.en_passant_target = None
 
-        self.selected_piece = None
-        self.turn_color = "black" if self.turn_color == "white" else "white"
+        if not is_simulation:
+            self.turn_color = "black" if self.turn_color == "white" else "white"
+            print(f"turn: {self.turn_color}")
+        if promotion and not is_simulation:
+            self.pieces[new_row][new_col] = Queen(new_row, new_col, piece.color)
+
+        if not is_simulation:
+            self.check_game_state()
         
 
     def undo_move(self):
@@ -210,6 +230,45 @@ class Board:
 
         # switch turn
         self.turn_color = 'black' if self.turn_color == 'white' else 'white'
+
+
+    def check_game_state(self):
+        in_check = self.is_in_check(self.turn_color)
+        has_moves = False
+
+        for row in self.pieces:
+            for piece in row:
+                if piece and piece.color == self.turn_color:
+                    if self.get_legal_moves(piece):  # Use your legal moves method!
+                        has_moves = True
+                        break
+            if has_moves:
+                break
+
+        if not has_moves:
+            if in_check:
+                self.game_over = True
+                self.game_result = f"Checkmate! {'White' if self.turn_color == 'black' else 'Black'} wins!"
+                print(self.game_result)
+            else:
+                self.game_over = True
+                self.game_result = "Stalemate! It's a draw."
+                print(self.game_result)
+
+
+    def draw_game_over_popup(self, screen):
+        font = pygame.font.SysFont(None, 48)
+        text = font.render(self.game_result, True, (255, 255, 255))
+        rect = text.get_rect(center=(540 // 2, 540// 2))
+
+        # Draw semi-transparent background
+        s = pygame.Surface((rect.width + 40, rect.height + 40))  # padding
+        s.set_alpha(200)  # transparency
+        s.fill((0, 0, 0))
+        s_rect = s.get_rect(center=rect.center)
+
+        screen.blit(s, s_rect)
+        screen.blit(text, rect)
 
 
     def draw(self, screen):
