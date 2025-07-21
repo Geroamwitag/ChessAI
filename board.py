@@ -259,7 +259,7 @@ class Board:
     def draw_game_over_popup(self, screen):
         font = pygame.font.SysFont(None, 48)
         text = font.render(self.game_result, True, (255, 255, 255))
-        rect = text.get_rect(center=(540 // 2, 540// 2))
+        rect = text.get_rect(center=(640 // 2, 640// 2))
 
         # Draw semi-transparent background
         s = pygame.Surface((rect.width + 40, rect.height + 40))  # padding
