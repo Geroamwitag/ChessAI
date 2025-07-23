@@ -1,15 +1,20 @@
 import pygame
 
 class Piece:
-    def __init__(self, row, col, color, image):
+    def __init__(self, row, col, color, image, name):
         self.row = row
         self.col = col
         self.color = color
+        self.name = name
 
         # load piece image and resize
         self.image = pygame.image.load(image)
         self.image_size = 60
         self.image = pygame.transform.scale(self.image, (self.image_size, self.image_size)) # 80x80 is a tile size
+
+
+    def __str__(self):
+        return f"{self.color} {self.name}"
 
 
     def __getstate__(self):

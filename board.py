@@ -17,11 +17,20 @@ class Board:
         self.pieces = [[None for _ in range(self.cols)] for _ in range(self.rows)]
         self.setup_pieces()
         self.turn_color = "white"
+        self.undo = False
+        self.vs_ai = False
+        self.ai_color = "white"
 
         self.game_over = False
         self.game_result = None
+        self.play_again_rect = None
+        self.quit_rect = None
 
-        
+
+    def reset(self):
+        self.__init__()
+
+
     def setup_pieces(self):
         # Pawns
         for col in range(self.cols):
@@ -125,9 +134,24 @@ class Board:
             # if a next move would leave the king in check do not allow that move
             if not board_copy.is_in_check(piece.color):
                 legal_moves.append(move)
-        return legal_moves 
+        return legal_moves
 
-    
+
+    def get_all_legal_moves(self, color):
+        moves = []
+        for row in self.pieces:
+            for piece in row:
+                if piece and piece.color == color:
+                    legal_moves = self.get_legal_moves(piece)
+                    if legal_moves:
+                        moves.append((piece, legal_moves))
+        return moves
+
+
+    def get_piece_at(self, row, col):
+        return self.pieces[row][col] 
+
+
     def move_piece(self, piece, new_row, new_col, is_simulation=False):
         current_row = piece.row
         current_col = piece.col
@@ -209,9 +233,21 @@ class Board:
 
         if not is_simulation:
             self.check_game_state()
+
+    
+    def undo_move(self):
+        if not self.move_history:
+            return
+        
+        self._undo_last_move()
+
+        if self.vs_ai:  # You can add this flag when you create the AI
+            if self.move_history:
+                self._undo_last_move()
+        
         
 
-    def undo_move(self):
+    def _undo_last_move(self):
         if not self.move_history:
             return
 
@@ -257,18 +293,43 @@ class Board:
 
 
     def draw_game_over_popup(self, screen):
-        font = pygame.font.SysFont(None, 48)
-        text = font.render(self.game_result, True, (255, 255, 255))
-        rect = text.get_rect(center=(640 // 2, 640// 2))
+        width, height = screen.get_size()
 
-        # Draw semi-transparent background
-        s = pygame.Surface((rect.width + 40, rect.height + 40))  # padding
-        s.set_alpha(200)  # transparency
-        s.fill((0, 0, 0))
-        s_rect = s.get_rect(center=rect.center)
+        # draw semi-transparent overlay
+        overlay = pygame.Surface((width, height))
+        overlay.set_alpha(180)  # 0=transparent, 255=opaque
+        overlay.fill((0, 0, 0))  # black overlay
+        screen.blit(overlay, (0, 0))
 
-        screen.blit(s, s_rect)
-        screen.blit(text, rect)
+        # popup box
+        box_width, box_height = 300, 200
+        box_x = (width - box_width) // 2
+        box_y = (height - box_height) // 2
+        pygame.draw.rect(screen, (255, 255, 255), (box_x, box_y, box_width, box_height))
+        pygame.draw.rect(screen, (0, 0, 0), (box_x, box_y, box_width, box_height), 4)  # Border
+
+        # texts on pop up
+        font = pygame.font.SysFont(None, 36)
+        text = f"{self.game_result}"
+        text_surface = font.render(text, True, (0, 0, 0))
+        text_rect = text_surface.get_rect(center=(width // 2, box_y + 60))
+        screen.blit(text_surface, text_rect)
+
+        # buttons
+        button_font = pygame.font.SysFont(None, 28)
+
+        self.play_again_rect = pygame.Rect(box_x + 40, box_y + 120, 100, 40)
+        self.quit_rect = pygame.Rect(box_x + 160, box_y + 120, 100, 40)
+
+        pygame.draw.rect(screen, (0, 200, 0), self.play_again_rect)
+        pygame.draw.rect(screen, (200, 0, 0), self.quit_rect)
+
+        play_again_text = button_font.render("Play Again", True, (255, 255, 255))
+        quit_text = button_font.render("Quit", True, (255, 255, 255))
+
+        # overlay buttoms and texts onto the screen
+        screen.blit(play_again_text, play_again_text.get_rect(center=self.play_again_rect.center))
+        screen.blit(quit_text, quit_text.get_rect(center=self.quit_rect.center))
 
 
     def draw(self, screen):

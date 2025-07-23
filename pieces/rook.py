@@ -8,11 +8,7 @@ class Rook(Piece):
             image_path = "assets/wR.png"
         else:
             image_path = "assets/bR.png"
-        super().__init__(row, col, color, image_path)
-
-
-    def __str__(self):
-        return f"{self.color} rook"
+        super().__init__(row, col, color, image_path, name="rook")
 
 
     def get_valid_moves(self, board, for_attack=False):

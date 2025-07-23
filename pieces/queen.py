@@ -7,11 +7,7 @@ class Queen(Piece):
             image_path = "assets/wQ.png"
         else:
             image_path = "assets/bQ.png"
-        super().__init__(row, col, color, image_path)
-
-
-    def __str__(self):
-        return f"{self.color} queen"
+        super().__init__(row, col, color, image_path, name="queen")
     
 
     def get_valid_moves(self, board, for_attack=False):
