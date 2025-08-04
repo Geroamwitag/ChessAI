@@ -20,7 +20,7 @@ class Pawn(Piece):
         if 0 <= one_step_row < board.rows and board.pieces[one_step_row][self.col] is None:
             moves.append((one_step_row, self.col))
 
-            # Two squares forward from starting row
+            # two squares forward from starting row
             two_step_row = self.row + 2 * direction
             if self.row == start_row and board.pieces[two_step_row][self.col] is None:
                 moves.append((two_step_row, self.col))

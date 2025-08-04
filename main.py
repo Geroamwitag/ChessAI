@@ -10,8 +10,8 @@ screen = pygame.display.set_mode((640, 640))
 clock = pygame.time.Clock()
 
 board = Board()
-board.ai_color = "white"
-ai = MinimaxAI(board.ai_color)
+board.ai_color = "black"
+ai = randomAI(board.ai_color)
 board.vs_ai = True
 
 # game loop
