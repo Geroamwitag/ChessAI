@@ -11,7 +11,7 @@ clock = pygame.time.Clock()
 
 board = Board()
 board.ai_color = "black"
-ai = randomAI(board.ai_color)
+ai = MinimaxAI(board.ai_color)
 board.vs_ai = True
 
 # game loop
@@ -54,6 +54,7 @@ while running:
     if (
         not board.game_over
         and board.turn_color == ai.color
+        and board.vs_ai
     ):
         piece, move = ai.generate_move(board)
         if piece and move:

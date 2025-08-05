@@ -18,7 +18,7 @@ class MinimaxAI:
                 new_piece = new_board.get_piece_at(piece.row, piece.col)
                 new_board.move_piece(new_piece, move[0], move[1], is_simulation=True)
 
-                score = self.minimax(new_board, self.depth - 1, False)
+                score = self.minimax(new_board, self.depth - 1, float('-inf'), float('inf'), False)
                 
                 if score > best_score:
                     best_score = score
@@ -27,7 +27,7 @@ class MinimaxAI:
         return best_move
 
     # the brain
-    def minimax(self, board, depth, is_maximizing):
+    def minimax(self, board, depth, alpha, beta, is_maximizing):
         if depth == 0 or board.game_over:
             return self.evaluate_board(board)
 
@@ -41,8 +41,14 @@ class MinimaxAI:
                     new_board = copy.deepcopy(board)
                     new_piece = new_board.get_piece_at(piece.row, piece.col)
                     new_board.move_piece(new_piece, move[0], move[1], is_simulation=True)
-                    eval = self.minimax(new_board, depth - 1, False)
+
+                    eval = self.minimax(new_board, depth - 1, alpha, beta, False)
                     max_eval = max(max_eval, eval)
+                    alpha = max(alpha, eval)
+
+                    if beta <= alpha:
+                        return max_eval
+                    
             return max_eval
 
         # opponent turn, worst move against us, minimize
@@ -53,8 +59,14 @@ class MinimaxAI:
                     new_board = copy.deepcopy(board)
                     new_piece = new_board.get_piece_at(piece.row, piece.col)
                     new_board.move_piece(new_piece, move[0], move[1], is_simulation=True)
-                    eval = self.minimax(new_board, depth - 1, True)
+
+                    eval = self.minimax(new_board, depth - 1, alpha, beta, True)
                     min_eval = min(min_eval, eval)
+                    beta = min(beta, eval)
+
+                    if beta <= alpha:
+                        return min_eval
+                    
             return min_eval
 
     def evaluate_board(self, board):

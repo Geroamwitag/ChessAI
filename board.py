@@ -12,6 +12,7 @@ class Board:
         self.selected_piece = None
         self.valid_moves = []
         self.move_history = []
+        self.simulation_history = []
         self.en_passant_target = None
         
         self.pieces = [[None for _ in range(self.cols)] for _ in range(self.rows)]
@@ -197,9 +198,8 @@ class Board:
                 rook.has_moved = True
 
         # create Move record
-        if not is_simulation:
-            move = Move(piece, (piece.row, piece.col), (new_row, new_col), captured, is_en_passant=is_en_passant)
-            self.move_history.append(move)
+        move = Move(piece, (piece.row, piece.col), (new_row, new_col), captured, is_en_passant=is_en_passant)
+        self.move_history.append(move)
 
         # remove piece from current position
         self.pieces[current_row][current_col] = None
@@ -228,7 +228,7 @@ class Board:
         if not is_simulation:
             self.turn_color = "black" if self.turn_color == "white" else "white"
             print(f"turn: {self.turn_color}")
-        if promotion and not is_simulation:
+        if promotion: # and not is_simulation
             self.pieces[new_row][new_col] = Queen(new_row, new_col, piece.color)
 
         if not is_simulation:
@@ -241,12 +241,11 @@ class Board:
         
         self._undo_last_move()
 
-        if self.vs_ai:  # You can add this flag when you create the AI
+        if self.vs_ai:
             if self.move_history:
                 self._undo_last_move()
         
         
-
     def _undo_last_move(self):
         if not self.move_history:
             return
