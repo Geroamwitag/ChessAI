@@ -18,7 +18,7 @@ class Board:
         self.pieces = [[None for _ in range(self.cols)] for _ in range(self.rows)]
         self.setup_pieces()
         self.turn_color = "white"
-        self.undo = False
+
         self.vs_ai = False
         self.ai_color = "white"
 
@@ -156,13 +156,11 @@ class Board:
     def move_piece(self, piece, new_row, new_col, is_simulation=False):
         current_row = piece.row
         current_col = piece.col
-
         is_en_passant = False
-        # the captured piece if any
         captured = self.pieces[new_row][new_col]
-
-        # promote if applicable
         promotion = False
+
+        # promote if a pawn is in the final row
         if isinstance(piece, Pawn):
             if (piece.color == 'white' and new_row == 0) or \
             (piece.color == 'black' and new_row == 7):
@@ -175,7 +173,6 @@ class Board:
                 # the captured pawn is behind the target square
                 captured_pawn_row = new_row + (1 if piece.color == 'white' else -1)
                 captured = self.pieces[captured_pawn_row][new_col]
-
 
         # check if a rook or king moved for castling
         if isinstance(piece, (King, Rook)):
@@ -228,7 +225,7 @@ class Board:
         if not is_simulation:
             self.turn_color = "black" if self.turn_color == "white" else "white"
             print(f"turn: {self.turn_color}")
-        if promotion: # and not is_simulation
+        if promotion:
             self.pieces[new_row][new_col] = Queen(new_row, new_col, piece.color)
 
         if not is_simulation:
@@ -378,10 +375,6 @@ class Board:
                 piece = self.pieces[row][col]
                 if piece is not None:
                     piece.draw(screen, self.tile_size)
-
-    def copy(self):
-        copied_board = deepcopy(self)
-        return copied_board
 
 
 

@@ -1,7 +1,7 @@
 import copy
 
 class MinimaxAI:
-    def __init__(self, color, depth=3):
+    def __init__(self, color, depth=2):
         self.color = color
         self.depth = depth
 
