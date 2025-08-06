@@ -16,7 +16,7 @@ board.vs_ai = True
 
 # game loop
 running = True
-while running:  
+while running:    
     # event handler
     for event in pygame.event.get():
         # quit game

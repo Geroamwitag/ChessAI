@@ -12,8 +12,8 @@ class Board:
         self.selected_piece = None
         self.valid_moves = []
         self.move_history = []
-        self.simulation_history = []
         self.en_passant_target = None
+        self.simulating = True
         
         self.pieces = [[None for _ in range(self.cols)] for _ in range(self.rows)]
         self.setup_pieces()
@@ -331,7 +331,7 @@ class Board:
         screen.blit(quit_text, quit_text.get_rect(center=self.quit_rect.center))
 
 
-    def draw(self, screen):
+    def draw(self, screen):        
         tile_color_1 = (238, 238, 210) # light, pale beige
         tile_color_2 = (118, 150, 86)  # dark, darkish green
         colors = [tile_color_1, tile_color_2]
@@ -378,6 +378,11 @@ class Board:
                 piece = self.pieces[row][col]
                 if piece is not None:
                     piece.draw(screen, self.tile_size)
+
+    def copy(self):
+        copied_board = deepcopy(self)
+        return copied_board
+
 
 
 class Move:

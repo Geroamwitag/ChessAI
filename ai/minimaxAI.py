@@ -1,7 +1,7 @@
 import copy
 
 class MinimaxAI:
-    def __init__(self, color, depth=2):
+    def __init__(self, color, depth=3):
         self.color = color
         self.depth = depth
 
@@ -11,14 +11,15 @@ class MinimaxAI:
 
         # get all legal moves for color
         for piece, moves in board.get_all_legal_moves(self.color):
+            
             for move in moves:
                 # simulate the move on a copy of the board and score
                 # save the best move
-                new_board = copy.deepcopy(board)
-                new_piece = new_board.get_piece_at(piece.row, piece.col)
-                new_board.move_piece(new_piece, move[0], move[1], is_simulation=True)
-
-                score = self.minimax(new_board, self.depth - 1, float('-inf'), float('inf'), False)
+                simulation_board = copy.deepcopy(board)
+                new_piece = simulation_board.get_piece_at(piece.row, piece.col)
+                simulation_board.move_piece(new_piece, move[0], move[1], is_simulation=True)
+                
+                score = self.minimax(simulation_board, self.depth - 1, float('-inf'), float('inf'), False)
                 
                 if score > best_score:
                     best_score = score
